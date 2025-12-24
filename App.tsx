@@ -268,7 +268,7 @@ const App: React.FC = () => {
             <NavLink to="/history" icon={<History size={22} />} label="List" />
 
             <div className="flex-1 flex flex-col items-center mb-1">
-              <Link to="/add" className="bg-blue-600 text-white p-4 rounded-full shadow-lg shadow-blue-200 -mt-6 active:scale-90 transition-transform">
+              <Link to="/add" className="bg-blue-600 text-white p-1 rounded-full shadow-lg shadow-blue-200 -mt-6 active:scale-90 transition-transform">
                 <PlusCircle size={24} />
               </Link>
               <span className="text-[10px] font-bold text-slate-400 mt-1">Expense</span>
