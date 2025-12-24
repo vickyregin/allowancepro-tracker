@@ -18,13 +18,19 @@ import {
   CreditCard,
   Users,
   Ticket,
-  UtensilsCrossed
+  UtensilsCrossed,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Eye
 } from 'lucide-react';
 import { Expense, Category, User, Role } from '../types';
+import ExpenseDetailModal from './ExpenseDetailModal';
 
 interface HistoryViewProps {
   expenses: Expense[];
   onDelete: (id: string) => void;
+  onUpdateStatus?: (id: string, status: 'Approved' | 'Rejected') => void;
   currentUser: User;
 }
 
@@ -46,11 +52,22 @@ const CategoryIcon = ({ category, size = 18 }: { category: Category, size?: numb
   }
 };
 
-const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUser }) => {
+const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, onUpdateStatus, currentUser }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<Category | 'All'>('All');
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
+  const [selectedUser, setSelectedUser] = useState<string>('All');
+  const [selectedProject, setSelectedProject] = useState<string>('All');
 
   const isAdmin = currentUser.role === Role.Admin;
+
+  const uniqueUsers = useMemo(() => {
+    return Array.from(new Set(expenses.map(e => e.userName))).sort();
+  }, [expenses]);
+
+  const uniqueProjects = useMemo(() => {
+    return Array.from(new Set(expenses.map(e => e.project))).sort();
+  }, [expenses]);
 
   const filteredExpenses = useMemo(() => {
     return expenses.filter(e => {
@@ -59,10 +76,12 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
         e.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         e.project.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'All' || e.category === selectedCategory;
+      const matchesUser = selectedUser === 'All' || e.userName === selectedUser;
+      const matchesProject = selectedProject === 'All' || e.project === selectedProject;
       const userMatch = isAdmin ? true : e.userId === currentUser.id;
-      return matchesSearch && matchesCategory && userMatch;
+      return matchesSearch && matchesCategory && matchesUser && matchesProject && userMatch;
     });
-  }, [expenses, searchTerm, selectedCategory, isAdmin, currentUser.id]);
+  }, [expenses, searchTerm, selectedCategory, selectedUser, selectedProject, isAdmin, currentUser.id]);
 
   const downloadCSV = () => {
     if (filteredExpenses.length === 0) return;
@@ -71,8 +90,8 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
     const headers = [
       "Date", "User Name", "Project", "Doc Number", "Category", "Amount", "Description",
       "Travel Mode", "From", "To", "KM", "Car Type",
-      "Stay Location", "Purpose/Detail", "Client Name", "No Persons",
-      "Person List", "Hotel Name", "Recipient", "Breakfast", "Lunch", "Dinner", "Notes"
+      "Stay Location", "Stay From", "Stay To", "Purpose/Detail", "Client Name", "No Persons",
+      "Person List", "Hotel Name", "Recipient", "Breakfast", "Lunch", "Dinner", "Status", "Notes"
     ];
 
     const rows = filteredExpenses.map(e => [
@@ -98,6 +117,9 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
       e.isBreakfast ? "Yes" : "No",
       e.isLunch ? "Yes" : "No",
       e.isDinner ? "Yes" : "No",
+      `"${e.stayFrom || ''}"`,
+      `"${e.stayTo || ''}"`,
+      e.status,
       `"${(e.note || '').replace(/"/g, '""')}"`
     ]);
 
@@ -123,6 +145,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
     if (e.approxKm) details.push(`${e.approxKm}KM`);
     if (e.carType) details.push(e.carType);
     if (e.stayLocation) details.push(`At: ${e.stayLocation}`);
+    if (e.stayFrom && e.stayTo) details.push(`${new Date(e.stayFrom).toLocaleDateString()} to ${new Date(e.stayTo).toLocaleDateString()}`);
     if (e.purpose) details.push(`Ref: ${e.purpose}`);
     if (e.clientName) details.push(`Client: ${e.clientName}`);
     if (e.advanceRecipient) details.push(`To: ${e.advanceRecipient}`);
@@ -180,6 +203,32 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
+
+          {isAdmin && (
+            <>
+              <select
+                value={selectedUser}
+                onChange={e => setSelectedUser(e.target.value)}
+                className="px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm font-medium"
+              >
+                <option value="All">All Users</option>
+                {uniqueUsers.map(user => (
+                  <option key={user} value={user}>{user}</option>
+                ))}
+              </select>
+
+              <select
+                value={selectedProject}
+                onChange={e => setSelectedProject(e.target.value)}
+                className="px-3 py-2 bg-white border border-slate-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm font-medium"
+              >
+                <option value="All">All Projects</option>
+                {uniqueProjects.map(proj => (
+                  <option key={proj} value={proj}>{proj}</option>
+                ))}
+              </select>
+            </>
+          )}
         </div>
       </div>
 
@@ -187,7 +236,11 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
         {filteredExpenses.length > 0 ? (
           <div className="divide-y divide-slate-100">
             {filteredExpenses.map((expense) => (
-              <div key={expense.id} className="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between">
+              <div
+                key={expense.id}
+                className="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between cursor-pointer group"
+                onClick={() => setSelectedExpense(expense)}
+              >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
                     <CategoryIcon category={expense.category} />
@@ -213,6 +266,21 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
                       <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
                         • {expense.category}
                       </span>
+                      <div className="flex items-center gap-1.5 ml-2">
+                        {expense.status === 'Approved' ? (
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                            <CheckCircle size={10} /> APPROVED
+                          </span>
+                        ) : expense.status === 'Rejected' ? (
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+                            <XCircle size={10} /> REJECTED
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                            <Clock size={10} /> PENDING
+                          </span>
+                        )}
+                      </div>
                     </div>
                     {/* Specific details display */}
                     {getSubText(expense) && (
@@ -224,14 +292,36 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="text-right">
+                  <div className="text-right flex flex-col items-end gap-2">
                     <p className="text-sm font-bold text-slate-900">₹{expense.amount.toFixed(2)}</p>
+
+                    {isAdmin && expense.status === 'Pending' && (
+                      <span className="flex items-center gap-1 text-[10px] text-blue-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Eye size={12} /> VIEW FORM
+                      </span>
+                    )}
+                    {isAdmin && expense.status === 'Pending' && onUpdateStatus && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => onUpdateStatus(expense.id, 'Approved')}
+                          className="px-2 py-1 text-[10px] font-bold bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => onUpdateStatus(expense.id, 'Rejected')}
+                          className="px-2 py-1 text-[10px] font-bold bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
                   </div>
                   <button
                     onClick={() => {
                       if (window.confirm('Delete this entry?')) onDelete(expense.id);
                     }}
-                    className="p-2 text-slate-300 hover:text-red-500 transition-colors rounded-lg"
+                    className="p-2 text-slate-300 hover:text-red-500 transition-colors rounded-lg self-start"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -246,6 +336,15 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
           </div>
         )}
       </div>
+
+      {selectedExpense && (
+        <ExpenseDetailModal
+          expense={selectedExpense}
+          onClose={() => setSelectedExpense(null)}
+          onUpdateStatus={onUpdateStatus}
+          currentUser={currentUser}
+        />
+      )}
     </div >
   );
 };

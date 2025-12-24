@@ -19,6 +19,9 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
     docNumber: '',
     receiptImage: '',
     note: '',
+    stayLocation: '',
+    stayFrom: new Date().toISOString().split('T')[0],
+    stayTo: new Date().toISOString().split('T')[0],
     travelMode: 'Bus',
     carType: 'Own Car',
     isBreakfast: false,
@@ -35,7 +38,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
       case Category.CarMaintenance:
         return formData.carType;
       case Category.Accommodation:
-        return formData.stayLocation;
+        return formData.stayLocation && formData.stayFrom && formData.stayTo;
       case Category.FoodAllowance:
         return formData.isBreakfast || formData.isLunch || formData.isDinner;
       case Category.DailyAllowance:
@@ -85,6 +88,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
       personCount: formData.personCount,
       personList: formData.personList,
       hotelName: formData.hotelName,
+      stayFrom: formData.stayFrom,
+      stayTo: formData.stayTo,
       advanceRecipient: formData.advanceRecipient,
       isBreakfast: formData.isBreakfast,
       isLunch: formData.isLunch,
@@ -174,18 +179,45 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
 
       case Category.Accommodation:
         return (
-          <div className="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100">
-            <label className="block text-xs font-semibold text-indigo-600 mb-1">Location of Stay <span className="text-red-500">*</span></label>
-            <div className="relative">
-              <MapPin size={16} className="absolute left-3 top-2.5 text-indigo-400" />
-              <input
-                type="text"
-                required
-                className="w-full pl-10 p-2 bg-white border border-indigo-100 rounded-lg text-sm"
-                placeholder="City / Area"
-                value={formData.stayLocation || ''}
-                onChange={e => setFormData({ ...formData, stayLocation: e.target.value })}
-              />
+          <div className="p-4 bg-indigo-50/50 rounded-xl border border-indigo-100 space-y-4">
+            <h3 className="text-xs font-bold text-indigo-700 uppercase tracking-wider mb-2">Accommodation Details</h3>
+
+            <div>
+              <label className="block text-[10px] font-bold text-indigo-400 uppercase tracking-tight mb-1">Location of Stay <span className="text-red-500">*</span></label>
+              <div className="relative">
+                <MapPin size={16} className="absolute left-3 top-2.5 text-indigo-400" />
+                <input
+                  type="text"
+                  required
+                  className="w-full pl-10 p-2 bg-white border border-indigo-100 rounded-lg text-sm"
+                  placeholder="City / Area"
+                  value={formData.stayLocation || ''}
+                  onChange={e => setFormData({ ...formData, stayLocation: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] font-bold text-indigo-400 uppercase tracking-tight mb-1">Stay From <span className="text-red-500">*</span></label>
+                <input
+                  type="date"
+                  required
+                  className="w-full p-2 bg-white border border-indigo-100 rounded-lg text-sm"
+                  value={formData.stayFrom}
+                  onChange={e => setFormData({ ...formData, stayFrom: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-indigo-400 uppercase tracking-tight mb-1">Stay To <span className="text-red-500">*</span></label>
+                <input
+                  type="date"
+                  required
+                  className="w-full p-2 bg-white border border-indigo-100 rounded-lg text-sm"
+                  value={formData.stayTo}
+                  onChange={e => setFormData({ ...formData, stayTo: e.target.value })}
+                />
+              </div>
             </div>
           </div>
         );

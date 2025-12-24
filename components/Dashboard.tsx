@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend
 } from 'recharts';
-import { ChevronLeft, ChevronRight, Sparkles, AlertCircle, Users, Filter, User as UserIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, AlertCircle, Users, Filter, User as UserIcon, CheckCircle, Clock } from 'lucide-react';
 import { Expense, Category, User, Role } from '../types';
 import { getFinancialInsights } from '../services/geminiService';
 
@@ -72,6 +72,20 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, users, currentMonth, se
 
   const uniqueUsersInView = useMemo(() => {
     return new Set(filteredExpenses.map(e => e.userId)).size;
+  }, [filteredExpenses]);
+
+  const statusSummary = useMemo(() => {
+    const summary = {
+      Pending: { count: 0, total: 0 },
+      Approved: { count: 0, total: 0 },
+      Rejected: { count: 0, total: 0 }
+    };
+    filteredExpenses.forEach(e => {
+      const status = e.status || 'Pending';
+      summary[status].count++;
+      summary[status].total += e.amount;
+    });
+    return summary;
   }, [filteredExpenses]);
 
   const dataByCategory = useMemo(() => {
@@ -205,21 +219,37 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, users, currentMonth, se
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Spent</p>
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Amount</p>
           <p className="text-3xl font-bold text-slate-900 mt-1">₹{totalSpent.toLocaleString()}</p>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{isAdmin && selectedUserId === 'all' ? 'Team Members' : 'Categories'}</p>
-          <div className="flex items-baseline gap-2 mt-1">
-            <p className="text-3xl font-bold text-blue-600">{isAdmin && selectedUserId === 'all' ? uniqueUsersInView : dataByCategory.length}</p>
-            {isAdmin && selectedUserId === 'all' && <Users size={16} className="text-blue-300" />}
+
+        <div className="bg-emerald-50 p-6 rounded-xl shadow-sm border border-emerald-100">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Approved</p>
+            <CheckCircle size={16} className="text-emerald-400" />
           </div>
+          <p className="text-2xl font-bold text-emerald-700 mt-1">₹{statusSummary.Approved.total.toLocaleString()}</p>
+          <p className="text-[10px] text-emerald-500 font-medium">{statusSummary.Approved.count} claims</p>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Records</p>
-          <p className="text-3xl font-bold text-indigo-600 mt-1">{filteredExpenses.length}</p>
+
+        <div className="bg-amber-50 p-6 rounded-xl shadow-sm border border-amber-100">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold text-amber-600 uppercase tracking-wider">Pending</p>
+            <Clock size={16} className="text-amber-400" />
+          </div>
+          <p className="text-2xl font-bold text-amber-700 mt-1">₹{statusSummary.Pending.total.toLocaleString()}</p>
+          <p className="text-[10px] text-amber-500 font-medium">{statusSummary.Pending.count} claims</p>
+        </div>
+
+        <div className="bg-red-50 p-6 rounded-xl shadow-sm border border-red-100">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold text-red-600 uppercase tracking-wider">Rejected</p>
+            <AlertCircle size={16} className="text-red-400" />
+          </div>
+          <p className="text-2xl font-bold text-red-700 mt-1">₹{statusSummary.Rejected.total.toLocaleString()}</p>
+          <p className="text-[10px] text-red-500 font-medium">{statusSummary.Rejected.count} claims</p>
         </div>
       </div>
 

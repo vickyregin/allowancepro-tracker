@@ -40,6 +40,7 @@ export interface Expense {
   project: string;
   docNumber: string;
   receiptImage?: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
   note?: string;
 
   // Specific Metadata Fields
@@ -54,6 +55,8 @@ export interface Expense {
   personCount?: number;
   personList?: string;
   hotelName?: string;
+  stayFrom?: string;
+  stayTo?: string;
   advanceRecipient?: string;
 
   // Food Allowance Specific

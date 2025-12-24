@@ -16,8 +16,9 @@ import Dashboard from './components/Dashboard';
 import ExpenseForm from './components/ExpenseForm';
 import HistoryView from './components/HistoryView';
 import UserManagement from './components/UserManagement';
+import StatusView from './components/StatusView';
 import Login from './components/Login';
-import { Expense, User, Role } from './types';
+import { Expense, Category, User, Role } from './types';
 import { supabase } from './services/supabase';
 
 const App: React.FC = () => {
@@ -62,6 +63,7 @@ const App: React.FC = () => {
           project: e.project,
           docNumber: e.doc_number,
           receiptImage: e.receipt_image,
+          status: e.status || 'Pending',
           note: e.note,
           travelMode: e.travel_mode,
           fromLocation: e.from_location,
@@ -73,6 +75,8 @@ const App: React.FC = () => {
           personCount: e.person_count,
           personList: e.person_list,
           hotelName: e.hotel_name,
+          stayFrom: e.stay_from,
+          stayTo: e.stay_to,
           advanceRecipient: e.advance_recipient,
           isBreakfast: e.is_breakfast,
           isLunch: e.is_lunch,
@@ -135,10 +139,13 @@ const App: React.FC = () => {
       person_count: newExpense.personCount,
       person_list: newExpense.personList,
       hotel_name: newExpense.hotelName,
+      stay_from: newExpense.stayFrom,
+      stay_to: newExpense.stayTo,
       advance_recipient: newExpense.advanceRecipient,
       is_breakfast: newExpense.isBreakfast,
       is_lunch: newExpense.isLunch,
-      is_dinner: newExpense.isDinner
+      is_dinner: newExpense.isDinner,
+      status: 'Pending'
     };
 
     const { data, error } = await supabase
@@ -166,12 +173,15 @@ const App: React.FC = () => {
       personCount: data.person_count,
       personList: data.person_list,
       hotelName: data.hotel_name,
+      stayFrom: data.stay_from,
+      stayTo: data.stay_to,
       docNumber: data.doc_number,
       receiptImage: data.receipt_image,
       advanceRecipient: data.advance_recipient,
       isBreakfast: data.is_breakfast,
       isLunch: data.is_lunch,
-      isDinner: data.is_dinner
+      isDinner: data.is_dinner,
+      status: data.status || 'Pending'
     };
 
     setExpenses(prev => [mapped, ...prev]);
@@ -183,6 +193,32 @@ const App: React.FC = () => {
       setExpenses(prev => prev.filter(e => e.id !== id));
     } else {
       alert('Error deleting expense: ' + error.message);
+    }
+  };
+
+  const updateExpenseStatus = async (id: string, status: 'Approved' | 'Rejected') => {
+    try {
+      const { data, error, status: responseStatus } = await supabase
+        .from('expenses')
+        .update({ status })
+        .eq('id', id)
+        .select();
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        alert('Update failed: No record found or permission denied.');
+        return;
+      }
+
+      // Success - update local state
+      setExpenses(prev => prev.map(e => e.id === id ? { ...e, status } : e));
+      console.log(`Status updated to ${status} for ${id}`);
+    } catch (err: any) {
+      console.error('Update Error:', err);
+      alert('Failed to update status in Database: ' + (err.message || 'Unknown Error'));
     }
   };
 
@@ -251,6 +287,7 @@ const App: React.FC = () => {
               <HistoryView
                 expenses={expenses}
                 onDelete={deleteExpense}
+                onUpdateStatus={updateExpenseStatus}
                 currentUser={currentUser}
               />
             } />
@@ -263,6 +300,13 @@ const App: React.FC = () => {
                 />
               } />
             )}
+            <Route path="/status" element={
+              <StatusView
+                expenses={expenses}
+                currentUser={currentUser}
+                onUpdateStatus={updateExpenseStatus}
+              />
+            } />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
@@ -272,6 +316,7 @@ const App: React.FC = () => {
           <div className="flex justify-between items-end max-w-md mx-auto">
             <NavLink to="/" icon={<LayoutDashboard size={22} />} label="Status" />
             <NavLink to="/history" icon={<History size={22} />} label="List" />
+            <NavLink to="/status" icon={<ShieldCheck size={22} />} label="Status" />
 
             <div className="flex-1 flex flex-col items-center mb-1">
               <Link to="/add" className="bg-blue-600 text-white p-1 rounded-full shadow-lg shadow-blue-200 -mt-6 active:scale-90 transition-transform">
@@ -300,6 +345,7 @@ const App: React.FC = () => {
             <SidebarLink to="/" icon={<LayoutDashboard size={20} />} label="Dashboard" />
             <SidebarLink to="/add" icon={<PlusCircle size={20} />} label="Add Expense" />
             <SidebarLink to="/history" icon={<History size={20} />} label="History" />
+            <SidebarLink to="/status" icon={<ShieldCheck size={20} />} label="Claim Status" />
             {currentUser.role === Role.Admin && (
               <div className="pt-4 mt-4 border-t border-slate-100">
                 <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-4">
