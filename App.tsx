@@ -1,0 +1,345 @@
+
+import React, { useState, useEffect } from 'react';
+import { HashRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  PlusCircle,
+  History,
+  TrendingUp,
+  User as UserIcon,
+  LogOut,
+  ShieldCheck,
+  Users,
+  Loader2
+} from 'lucide-react';
+import Dashboard from './components/Dashboard';
+import ExpenseForm from './components/ExpenseForm';
+import HistoryView from './components/HistoryView';
+import UserManagement from './components/UserManagement';
+import Login from './components/Login';
+import { Expense, User, Role } from './types';
+import { supabase } from './services/supabase';
+
+const App: React.FC = () => {
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    const saved = localStorage.getItem('allowance_session');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [authLoading, setAuthLoading] = useState(false);
+
+  const [users, setUsers] = useState<User[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  });
+
+  // Fetch expenses and users
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const fetchData = async () => {
+      setAuthLoading(true);
+
+      // 1. Fetch Expenses
+      let query = supabase.from('expenses').select('*');
+      if (currentUser.role !== Role.Admin) {
+        query = query.eq('user_id', currentUser.id);
+      }
+
+      const { data: expData, error: expError } = await query.order('date', { ascending: false });
+      if (!expError && expData) {
+        setExpenses(expData.map(e => ({
+          ...e,
+          id: e.id,
+          userId: e.user_id,
+          userName: e.user_name,
+          amount: e.amount,
+          category: e.category,
+          date: e.date,
+          description: e.description,
+          project: e.project,
+          note: e.note,
+          travelMode: e.travel_mode,
+          fromLocation: e.from_location,
+          toLocation: e.to_location,
+          approxKm: e.approx_km,
+          carType: e.car_type,
+          stayLocation: e.stay_location,
+          clientName: e.client_name,
+          personCount: e.person_count,
+          personList: e.person_list,
+          hotelName: e.hotel_name,
+          advanceRecipient: e.advance_recipient,
+          isBreakfast: e.is_breakfast,
+          isLunch: e.is_lunch,
+          isDinner: e.is_dinner
+        })));
+      }
+
+      // 2. Fetch Users (Admins only)
+      if (currentUser.role === Role.Admin) {
+        const { data: userData } = await supabase.from('userlist').select('*').order('name');
+        if (userData) {
+          setUsers(userData.map(u => ({
+            id: u.id,
+            email: u.email,
+            name: u.name,
+            role: u.role,
+            isActive: u.is_active
+          })));
+        }
+      }
+
+      setAuthLoading(false);
+    };
+
+    fetchData();
+  }, [currentUser]);
+
+  const handleLogin = (user: User) => {
+    setCurrentUser(user);
+    localStorage.setItem('allowance_session', JSON.stringify(user));
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('allowance_session');
+  };
+
+  const addExpense = async (newExpense: Omit<Expense, 'id' | 'userId' | 'userName'>) => {
+    if (!currentUser) return;
+
+    const dbExpense = {
+      user_id: currentUser.id,
+      user_name: currentUser.name,
+      amount: newExpense.amount,
+      category: newExpense.category,
+      date: newExpense.date,
+      description: newExpense.description,
+      project: newExpense.project,
+      note: newExpense.note,
+      travel_mode: newExpense.travelMode,
+      from_location: newExpense.fromLocation,
+      to_location: newExpense.toLocation,
+      approx_km: newExpense.approxKm,
+      car_type: newExpense.carType,
+      purpose: newExpense.purpose,
+      stay_location: newExpense.stayLocation,
+      client_name: newExpense.clientName,
+      person_count: newExpense.personCount,
+      person_list: newExpense.personList,
+      hotel_name: newExpense.hotelName,
+      advance_recipient: newExpense.advanceRecipient,
+      is_breakfast: newExpense.isBreakfast,
+      is_lunch: newExpense.isLunch,
+      is_dinner: newExpense.isDinner
+    };
+
+    const { data, error } = await supabase
+      .from('expenses')
+      .insert([dbExpense])
+      .select()
+      .single();
+
+    if (error) {
+      alert('Failed to save expense: ' + error.message);
+      return;
+    }
+
+    const mapped: Expense = {
+      ...data,
+      userId: data.user_id,
+      userName: data.user_name,
+      travelMode: data.travel_mode,
+      fromLocation: data.from_location,
+      toLocation: data.to_location,
+      approxKm: data.approx_km,
+      carType: data.car_type,
+      stayLocation: data.stay_location,
+      clientName: data.client_name,
+      personCount: data.person_count,
+      personList: data.person_list,
+      hotelName: data.hotel_name,
+      advanceRecipient: data.advance_recipient,
+      isBreakfast: data.is_breakfast,
+      isLunch: data.is_lunch,
+      isDinner: data.is_dinner
+    };
+
+    setExpenses(prev => [mapped, ...prev]);
+  };
+
+  const deleteExpense = async (id: string) => {
+    const { error } = await supabase.from('expenses').delete().eq('id', id);
+    if (!error) {
+      setExpenses(prev => prev.filter(e => e.id !== id));
+    } else {
+      alert('Error deleting expense: ' + error.message);
+    }
+  };
+
+  const toggleUserStatus = (id: string) => {
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, isActive: !u.isActive } : u));
+  };
+
+  const deleteUser = (id: string) => {
+    setUsers(prev => prev.filter(u => u.id !== id));
+  };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="animate-spin text-blue-600" size={48} />
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return <Login onLogin={handleLogin} />;
+  }
+
+  return (
+    <HashRouter>
+      <div className="flex flex-col min-h-screen bg-slate-50 text-slate-900">
+        {/* Header */}
+        <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="bg-blue-600 p-2 rounded-lg text-white">
+                <TrendingUp size={20} />
+              </div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                AllowancePro {currentUser.role === Role.Admin && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase tracking-tighter ml-2">Admin</span>}
+              </h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="hidden sm:block text-right">
+                <p className="text-xs font-bold text-slate-900 leading-none">{currentUser.name}</p>
+                <p className="text-[10px] text-slate-500 leading-none mt-1 uppercase tracking-wider">{currentUser.role}</p>
+              </div>
+              <div className="bg-slate-100 p-2 rounded-full text-slate-600">
+                <UserIcon size={20} />
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6 sm:px-6 lg:px-8 mb-20 md:mb-0">
+          <Routes>
+            <Route path="/" element={
+              <Dashboard
+                expenses={expenses}
+                users={users}
+                currentMonth={currentMonth}
+                setCurrentMonth={setCurrentMonth}
+                currentUser={currentUser}
+              />
+            } />
+            <Route path="/add" element={
+              <ExpenseForm onAdd={addExpense} />
+            } />
+            <Route path="/history" element={
+              <HistoryView
+                expenses={expenses}
+                onDelete={deleteExpense}
+                currentUser={currentUser}
+              />
+            } />
+            {currentUser.role === Role.Admin && (
+              <Route path="/users" element={
+                <UserManagement
+                  users={users}
+                  onToggleStatus={toggleUserStatus}
+                  onDeleteUser={deleteUser}
+                />
+              } />
+            )}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+
+        {/* Bottom Navigation for Mobile */}
+        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3 md:hidden z-50">
+          <div className="flex justify-around items-center max-w-md mx-auto">
+            <NavLink to="/" icon={<LayoutDashboard size={24} />} label="Stats" />
+            <NavLink to="/history" icon={<History size={24} />} label="List" />
+            <NavLink to="/add" icon={<PlusCircle size={28} />} label="Add" primary />
+            {currentUser.role === Role.Admin && (
+              <NavLink to="/users" icon={<Users size={24} />} label="Users" />
+            )}
+            <button onClick={handleLogout} className="flex flex-col items-center gap-1 text-slate-400">
+              <LogOut size={24} />
+              <span className="text-[10px] font-medium">Exit</span>
+            </button>
+          </div>
+        </nav>
+
+        {/* Sidebar for Desktop */}
+        <aside className="hidden md:flex fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-slate-200 flex-col p-4">
+          <div className="space-y-2">
+            <SidebarLink to="/" icon={<LayoutDashboard size={20} />} label="Dashboard" />
+            <SidebarLink to="/add" icon={<PlusCircle size={20} />} label="Add Expense" />
+            <SidebarLink to="/history" icon={<History size={20} />} label="History" />
+            {currentUser.role === Role.Admin && (
+              <div className="pt-4 mt-4 border-t border-slate-100">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-4">
+                  <ShieldCheck size={12} /> Management
+                </div>
+                <SidebarLink to="/users" icon={<Users size={20} />} label="User List" />
+              </div>
+            )}
+          </div>
+          <div className="mt-auto pt-4 border-t border-slate-100">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 w-full px-4 py-2 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+            >
+              <LogOut size={20} />
+              <span>Logout</span>
+            </button>
+          </div>
+        </aside>
+      </div>
+    </HashRouter>
+  );
+};
+
+const NavLink: React.FC<{ to: string, icon: React.ReactNode, label: string, primary?: boolean }> = ({ to, icon, label, primary }) => {
+  const location = useLocation();
+  const isActive = location.pathname === to;
+
+  return (
+    <Link to={to} className={`flex flex-col items-center gap-1 transition-colors ${primary ? '-mt-8' : ''}`}>
+      <div className={`p-2 rounded-full transition-all ${primary
+        ? 'bg-blue-600 text-white shadow-lg scale-125'
+        : isActive ? 'text-blue-600' : 'text-slate-400'
+        }`}>
+        {icon}
+      </div>
+      {!primary && <span className={`text-[10px] font-medium ${isActive ? 'text-blue-600' : 'text-slate-400'}`}>{label}</span>}
+    </Link>
+  );
+};
+
+const SidebarLink: React.FC<{ to: string, icon: React.ReactNode, label: string }> = ({ to, icon, label }) => {
+  const location = useLocation();
+  const isActive = location.pathname === to;
+
+  return (
+    <Link
+      to={to}
+      className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${isActive
+        ? 'bg-blue-50 text-blue-600 font-semibold'
+        : 'text-slate-600 hover:bg-slate-50'
+        }`}
+    >
+      {icon}
+      <span>{label}</span>
+    </Link>
+  );
+};
+
+export default App;
