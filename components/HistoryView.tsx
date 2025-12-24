@@ -69,7 +69,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
 
     // Comprehensive Headers for Admin
     const headers = [
-      "Date", "User Name", "Project", "Category", "Amount", "Description",
+      "Date", "User Name", "Project", "Doc Number", "Category", "Amount", "Description",
       "Travel Mode", "From", "To", "KM", "Car Type",
       "Stay Location", "Purpose/Detail", "Client Name", "No Persons",
       "Person List", "Hotel Name", "Recipient", "Breakfast", "Lunch", "Dinner", "Notes"
@@ -79,6 +79,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
       e.date,
       `"${e.userName.replace(/"/g, '""')}"`,
       `"${e.project.replace(/"/g, '""')}"`,
+      `"${(e.docNumber || '').replace(/"/g, '""')}"`,
       e.category,
       e.amount.toFixed(2),
       `"${e.description.replace(/"/g, '""')}"`,
@@ -206,6 +207,9 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
                         <CalendarIcon size={12} />
                         {new Date(expense.date).toLocaleDateString()}
                       </span>
+                      <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold flex items-center gap-1">
+                        # {expense.docNumber}
+                      </span>
                       <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
                         • {expense.category}
                       </span>
@@ -242,7 +246,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 

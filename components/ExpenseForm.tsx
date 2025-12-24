@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IndianRupee, Calendar, Tag, FileText, ArrowLeft, Save, Briefcase, MapPin, Users, Building, Info, User as UserIcon, Coffee, UtensilsCrossed, Moon } from 'lucide-react';
+import { IndianRupee, Calendar, Tag, FileText, ArrowLeft, Save, Briefcase, MapPin, Users, Building, Info, User as UserIcon, Coffee, UtensilsCrossed, Moon, Hash, Camera, Upload, X, ShieldCheck } from 'lucide-react';
 import { Category, Expense } from '../types';
 
 interface ExpenseFormProps {
@@ -16,6 +16,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
     date: new Date().toISOString().split('T')[0],
     description: '',
     project: '',
+    docNumber: '',
+    receiptImage: '',
     note: '',
     travelMode: 'Bus',
     carType: 'Own Car',
@@ -53,8 +55,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!rawAmount || !formData.description || !formData.project || !formData.date || !formData.category) {
-      alert("Please fill in all mandatory general fields.");
+    if (!rawAmount || !formData.description || !formData.project || !formData.docNumber || !formData.date || !formData.category) {
+      alert("Please fill in all mandatory general fields (Amount, Description, Project, Doc Number, Date, Category).");
       return;
     }
 
@@ -69,6 +71,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
       date: formData.date as string,
       description: formData.description as string,
       project: formData.project as string,
+      docNumber: formData.docNumber as string,
+      receiptImage: formData.receiptImage,
       note: formData.note,
       travelMode: formData.travelMode,
       fromLocation: formData.fromLocation,
@@ -374,8 +378,38 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert("File size too large. Please select an image under 5MB.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, receiptImage: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFilePicker = () => {
+    document.getElementById('receipt-upload')?.click();
+  };
+
   return (
     <div className="max-w-2xl mx-auto md:ml-64 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+      {/* Hidden File Input */}
+      <input
+        type="file"
+        id="receipt-upload"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
       <div className="p-6 border-b border-slate-100 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
@@ -421,6 +455,24 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
               placeholder="e.g. Phoenix Project"
               value={formData.project}
               onChange={e => setFormData({ ...formData, project: e.target.value })}
+              className="block w-full pl-10 pr-4 py-3 border-slate-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-slate-50 font-medium"
+            />
+          </div>
+        </div>
+
+        {/* Document Number */}
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">Document Number <span className="text-red-500">*</span></label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+              <Hash size={18} />
+            </div>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Bill #12345"
+              value={formData.docNumber}
+              onChange={e => setFormData({ ...formData, docNumber: e.target.value })}
               className="block w-full pl-10 pr-4 py-3 border-slate-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-slate-50 font-medium"
             />
           </div>
@@ -495,6 +547,45 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
           />
         </div>
 
+        {/* Bill Attachment Placeholder */}
+        <div>
+          <label className="block text-sm font-semibold text-slate-700 mb-2">Bill Attachment</label>
+          <div
+            className="border-2 border-dashed border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center bg-slate-50 hover:bg-slate-100 hover:border-blue-300 transition-all cursor-pointer group mb-10"
+            onClick={triggerFilePicker}
+          >
+            {formData.receiptImage ? (
+              <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-slate-200">
+                <img src={formData.receiptImage} alt="Receipt Preview" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setFormData({ ...formData, receiptImage: '' }); }}
+                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="w-16 h-16 bg-white rounded-full shadow-sm flex items-center justify-center text-slate-400 group-hover:text-blue-500 transition-colors mb-3">
+                  <Camera size={28} />
+                </div>
+                <p className="text-sm font-bold text-slate-600">Capture or Upload Bill</p>
+                <p className="text-xs text-slate-400 mt-1">Tap to open camera or browse files</p>
+
+                <div className="flex gap-4 mt-6">
+                  <div className="flex items-center gap-1.5 px-4 py-2 bg-white rounded-lg border border-slate-200 text-[10px] font-bold text-slate-500 shadow-sm">
+                    <Camera size={12} /> CAMERA
+                  </div>
+                  <div className="flex items-center gap-1.5 px-4 py-2 bg-white rounded-lg border border-slate-200 text-[10px] font-bold text-slate-500 shadow-sm">
+                    <Upload size={12} /> GALLERY
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
         <button
           type="submit"
           className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all shadow-md active:scale-95"
@@ -502,8 +593,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
           <Save size={20} />
           Save Expense
         </button>
-      </form>
-    </div>
+      </form >
+    </div >
   );
 };
 

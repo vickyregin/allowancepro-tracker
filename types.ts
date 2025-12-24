@@ -38,8 +38,10 @@ export interface Expense {
   date: string;
   description: string;
   project: string;
+  docNumber: string;
+  receiptImage?: string;
   note?: string;
-  
+
   // Specific Metadata Fields
   travelMode?: 'Bus' | 'Car' | 'Bike' | 'Flight';
   fromLocation?: string;
@@ -53,7 +55,7 @@ export interface Expense {
   personList?: string;
   hotelName?: string;
   advanceRecipient?: string;
-  
+
   // Food Allowance Specific
   isBreakfast?: boolean;
   isLunch?: boolean;
