@@ -83,17 +83,21 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
-        <div className="bg-blue-600 p-8 text-center text-white">
-          <div className="inline-flex p-3 bg-white/20 rounded-2xl mb-4">
-            <TrendingUp size={32} />
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans ring-1 ring-slate-200">
+      <div className="max-w-md w-full bg-white rounded-[2rem] shadow-2xl shadow-blue-100/50 border border-slate-100 overflow-hidden animate-in fade-in zoom-in-95 duration-500">
+        <div className="p-8 pb-0 text-center mb-0 mt-4">
+          <div className="inline-block p-4 bg-white rounded-3xl shadow-lg border border-slate-50 mb-6 group transition-transform hover:scale-105">
+            <img
+              src="https://flashkartindia.com/img/logo.jpg"
+              alt="Flashkart Logo"
+              className="h-16 w-auto object-contain"
+            />
           </div>
-          <h1 className="text-2xl font-bold">AllowancePro</h1>
-          <p className="text-blue-100 mt-1">Personal & Corporate Expense Tracker</p>
+          <h2 className="text-3xl font-black text-slate-800 tracking-tight">AllowancePro</h2>
+          <p className="text-slate-500 mt-1 text-sm font-medium">Claims & Reimbursement Portal</p>
         </div>
 
-        <form onSubmit={handleAuth} className="p-8 space-y-4">
+        <form onSubmit={handleAuth} className="p-8 pt-6 space-y-4">
           <h2 className="text-xl font-bold text-slate-800 mb-6 text-center">
             {isRegistering ? 'Create Account' : 'Welcome Back'}
           </h2>
@@ -149,15 +153,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 mt-4 flex items-center justify-center gap-2"
+            className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-[0.98] disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {loading ? (
-              <>
-                <Loader2 className="animate-spin" size={20} />
-                <span>Processing...</span>
-              </>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              isRegistering ? 'Sign Up' : 'Sign In'
+              isRegistering ? 'Register Now' : 'Sign In'
             )}
           </button>
 

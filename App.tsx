@@ -248,9 +248,13 @@ const App: React.FC = () => {
         {/* Header */}
         <header className="sticky top-0 z-40 w-full bg-white/80 backdrop-blur-md border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="bg-blue-600 p-2 rounded-lg text-white">
-                <TrendingUp size={20} />
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-1 rounded-lg border border-slate-100 shadow-sm">
+                <img
+                  src="https://flashkartindia.com/img/logo.jpg"
+                  alt="Flashkart Logo"
+                  className="h-8 w-auto object-contain"
+                />
               </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 AllowancePro {currentUser.role === Role.Admin && <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full uppercase tracking-tighter ml-2">Admin</span>}
