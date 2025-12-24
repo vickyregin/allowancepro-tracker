@@ -307,19 +307,18 @@ const App: React.FC = () => {
   );
 };
 
-const NavLink: React.FC<{ to: string, icon: React.ReactNode, label: string, primary?: boolean }> = ({ to, icon, label, primary }) => {
+const NavLink: React.FC<{ to: string, icon: React.ReactNode, label: string }> = ({ to, icon, label }) => {
   const location = useLocation();
   const isActive = location.pathname === to;
 
   return (
-    <Link to={to} className={`flex flex-col items-center gap-1 transition-colors ${primary ? '-mt-8' : ''}`}>
-      <div className={`p-2 rounded-full transition-all ${primary
-        ? 'bg-blue-600 text-white shadow-lg scale-125'
-        : isActive ? 'text-blue-600' : 'text-slate-400'
-        }`}>
+    <Link to={to} className="flex-1 flex flex-col items-center justify-center py-2 gap-1 transition-colors">
+      <div className={`transition-all ${isActive ? 'text-blue-600' : 'text-slate-400'}`}>
         {icon}
       </div>
-      {!primary && <span className={`text-[10px] font-medium ${isActive ? 'text-blue-600' : 'text-slate-400'}`}>{label}</span>}
+      <span className={`text-[10px] font-bold ${isActive ? 'text-blue-600' : 'text-slate-400'}`}>
+        {label}
+      </span>
     </Link>
   );
 };
