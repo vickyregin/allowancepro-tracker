@@ -262,17 +262,28 @@ const App: React.FC = () => {
         </main>
 
         {/* Bottom Navigation for Mobile */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-4 py-3 md:hidden z-50">
-          <div className="flex justify-around items-center max-w-md mx-auto">
-            <NavLink to="/" icon={<LayoutDashboard size={24} />} label="Stats" />
-            <NavLink to="/history" icon={<History size={24} />} label="List" />
-            <NavLink to="/add" icon={<PlusCircle size={28} />} label="Add" primary />
+        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-2 pb-safe md:hidden z-50">
+          <div className="flex justify-between items-end max-w-md mx-auto">
+            <NavLink to="/" icon={<LayoutDashboard size={22} />} label="Status" />
+            <NavLink to="/history" icon={<History size={22} />} label="List" />
+
+            <div className="flex-1 flex flex-col items-center mb-1">
+              <Link to="/add" className="bg-blue-600 text-white p-4 rounded-full shadow-lg shadow-blue-200 -mt-6 active:scale-90 transition-transform">
+                <PlusCircle size={24} />
+              </Link>
+              <span className="text-[10px] font-bold text-slate-400 mt-1">Expense</span>
+            </div>
+
             {currentUser.role === Role.Admin && (
-              <NavLink to="/users" icon={<Users size={24} />} label="Users" />
+              <NavLink to="/users" icon={<Users size={22} />} label="Users" />
             )}
-            <button onClick={handleLogout} className="flex flex-col items-center gap-1 text-slate-400">
-              <LogOut size={24} />
-              <span className="text-[10px] font-medium">Exit</span>
+
+            <button
+              onClick={handleLogout}
+              className="flex-1 flex flex-col items-center justify-center py-2 gap-1 text-slate-400 hover:text-red-500 transition-colors"
+            >
+              <LogOut size={22} />
+              <span className="text-[10px] font-bold">Exit</span>
             </button>
           </div>
         </nav>
