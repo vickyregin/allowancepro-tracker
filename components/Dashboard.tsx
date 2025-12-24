@@ -208,7 +208,7 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, users, currentMonth, se
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Spent</p>
-          <p className="text-3xl font-bold text-slate-900 mt-1">${totalSpent.toLocaleString()}</p>
+          <p className="text-3xl font-bold text-slate-900 mt-1">₹{totalSpent.toLocaleString()}</p>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
           <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{isAdmin && selectedUserId === 'all' ? 'Team Members' : 'Categories'}</p>
@@ -241,7 +241,7 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, users, currentMonth, se
                   <p className="text-[10px] text-slate-500 uppercase tracking-tight">{user.count} transactions</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold text-blue-600">${user.total.toLocaleString()}</p>
+                  <p className="text-sm font-bold text-blue-600">₹{user.total.toLocaleString()}</p>
                   <div className="flex items-center justify-end text-[10px] text-slate-400">
                     {totalSpent > 0 ? ((user.total / totalSpent) * 100).toFixed(1) : 0}%
                   </div>
@@ -256,20 +256,20 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, users, currentMonth, se
       <div className="space-y-6">
         {/* Spending by Category - Half Width on Desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[400px]">
+          <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 min-h-[320px] sm:min-h-[400px]">
             <h3 className="text-base font-semibold text-slate-800 mb-4">
               {selectedUserId === 'all' ? 'Spending by Category' : `${selectedUserName}'s Categories`}
             </h3>
             {dataByCategory.length > 0 ? (
-              <div className="h-64 sm:h-80">
+              <div className="h-[250px] sm:h-80 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                     <Pie
                       data={dataByCategory}
                       cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
+                      cy="45%"
+                      innerRadius={window.innerWidth < 640 ? 45 : 60}
+                      outerRadius={window.innerWidth < 640 ? 65 : 80}
                       paddingAngle={5}
                       dataKey="value"
                     >
@@ -279,9 +279,13 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, users, currentMonth, se
                     </Pie>
                     <Tooltip
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                      formatter={(value: number) => [`$${value.toFixed(2)}`, 'Spent']}
+                      formatter={(value: number) => [`₹${value.toFixed(2)}`, 'Spent']}
                     />
-                    <Legend />
+                    <Legend
+                      iconSize={10}
+                      verticalAlign="bottom"
+                      wrapperStyle={{ fontSize: '10px', paddingTop: '10px' }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -293,10 +297,7 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, users, currentMonth, se
             )}
           </div>
 
-          {/* Placeholder or info card to balance the top row if needed, 
-              or we can let Category take full width too. 
-              The user specifically asked for Budget Usage to be 100% below. */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-center items-center text-center space-y-2">
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-center items-center text-center space-y-2 hidden lg:flex">
             <div className="bg-blue-50 p-4 rounded-full text-blue-600 mb-2">
               <Sparkles size={32} />
             </div>
@@ -308,19 +309,40 @@ const Dashboard: React.FC<DashboardProps> = ({ expenses, users, currentMonth, se
         </div>
 
         {/* Top Budget Usage - 100% Width Below */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[400px] w-full">
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-slate-200 min-h-[350px] sm:min-h-[400px] w-full overflow-hidden">
           <h3 className="text-base font-semibold text-slate-800 mb-4">Top Budget Usage</h3>
           {dataByCategory.length > 0 ? (
-            <div className="h-80 sm:h-96 w-full">
+            <div className="h-[320px] sm:h-96 w-full -ml-4 sm:ml-0">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={[...dataByCategory].sort((a, b) => b.value - a.value).slice(0, 8)}>
-                  <XAxis dataKey="name" fontSize={12} interval={0} stroke="#94a3b8" />
-                  <YAxis fontSize={12} stroke="#94a3b8" />
+                <BarChart
+                  data={[...dataByCategory].sort((a, b) => b.value - a.value).slice(0, 8)}
+                  margin={{ top: 10, right: 30, left: 10, bottom: 50 }}
+                >
+                  <XAxis
+                    dataKey="name"
+                    fontSize={10}
+                    interval={0}
+                    stroke="#94a3b8"
+                    angle={-45}
+                    textAnchor="end"
+                    tick={{ fill: '#64748b' }}
+                    height={70}
+                  />
+                  <YAxis
+                    fontSize={10}
+                    stroke="#94a3b8"
+                    tickFormatter={(value) => `₹${value}`}
+                  />
                   <Tooltip
                     cursor={{ fill: '#f1f5f9' }}
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                   />
-                  <Bar dataKey="value" fill="#2563eb" radius={[6, 6, 0, 0]} barSize={60} />
+                  <Bar
+                    dataKey="value"
+                    fill="#2563eb"
+                    radius={[4, 4, 0, 0]}
+                    barSize={window.innerWidth < 640 ? 25 : 45}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>

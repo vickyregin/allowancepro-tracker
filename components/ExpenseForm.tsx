@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DollarSign, Calendar, Tag, FileText, ArrowLeft, Save, Briefcase, MapPin, Users, Building, Info, User as UserIcon, Coffee, UtensilsCrossed, Moon } from 'lucide-react';
+import { IndianRupee, Calendar, Tag, FileText, ArrowLeft, Save, Briefcase, MapPin, Users, Building, Info, User as UserIcon, Coffee, UtensilsCrossed, Moon } from 'lucide-react';
 import { Category, Expense } from '../types';
 
 interface ExpenseFormProps {
@@ -52,7 +52,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!rawAmount || !formData.description || !formData.project || !formData.date || !formData.category) {
       alert("Please fill in all mandatory general fields.");
       return;
@@ -99,10 +99,10 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Travel Mode <span className="text-red-500">*</span></label>
-                <select 
+                <select
                   className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
                   value={formData.travelMode}
-                  onChange={e => setFormData({...formData, travelMode: e.target.value as any})}
+                  onChange={e => setFormData({ ...formData, travelMode: e.target.value as any })}
                 >
                   <option value="Bus">Bus</option>
                   <option value="Car">Car</option>
@@ -112,35 +112,35 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Approx KM <span className="text-red-500">*</span></label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   required
                   className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
                   placeholder="e.g. 15"
                   value={formData.approxKm || ''}
-                  onChange={e => setFormData({...formData, approxKm: parseFloat(e.target.value)})}
+                  onChange={e => setFormData({ ...formData, approxKm: parseFloat(e.target.value) })}
                 />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">From Location <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
                   className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
                   placeholder="Point A"
                   value={formData.fromLocation || ''}
-                  onChange={e => setFormData({...formData, fromLocation: e.target.value})}
+                  onChange={e => setFormData({ ...formData, fromLocation: e.target.value })}
                 />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">To Location <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
                   className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
                   placeholder="Point B"
                   value={formData.toLocation || ''}
-                  onChange={e => setFormData({...formData, toLocation: e.target.value})}
+                  onChange={e => setFormData({ ...formData, toLocation: e.target.value })}
                 />
               </div>
             </div>
@@ -154,12 +154,12 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
             <div className="flex gap-4">
               {['Own Car', 'Company Car'].map(type => (
                 <label key={type} className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="radio" 
-                    name="carType" 
+                  <input
+                    type="radio"
+                    name="carType"
                     value={type}
                     checked={formData.carType === type}
-                    onChange={() => setFormData({...formData, carType: type as any})}
+                    onChange={() => setFormData({ ...formData, carType: type as any })}
                   />
                   <span className="text-sm text-slate-700">{type}</span>
                 </label>
@@ -174,13 +174,13 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
             <label className="block text-xs font-semibold text-indigo-600 mb-1">Location of Stay <span className="text-red-500">*</span></label>
             <div className="relative">
               <MapPin size={16} className="absolute left-3 top-2.5 text-indigo-400" />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 required
                 className="w-full pl-10 p-2 bg-white border border-indigo-100 rounded-lg text-sm"
                 placeholder="City / Area"
                 value={formData.stayLocation || ''}
-                onChange={e => setFormData({...formData, stayLocation: e.target.value})}
+                onChange={e => setFormData({ ...formData, stayLocation: e.target.value })}
               />
             </div>
           </div>
@@ -196,21 +196,20 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
                 { label: 'Lunch', icon: <UtensilsCrossed size={14} />, field: 'isLunch' },
                 { label: 'Dinner', icon: <Moon size={14} />, field: 'isDinner' }
               ].map(meal => (
-                <label 
+                <label
                   key={meal.field}
-                  className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition-all shadow-sm flex-1 min-w-[120px] ${
-                    formData[meal.field as keyof Expense] 
-                      ? 'bg-yellow-600 border-yellow-600 text-white' 
-                      : 'bg-white border-yellow-100 text-slate-700 hover:border-yellow-300'
-                  }`}
+                  className={`flex items-center gap-2 p-3 border rounded-xl cursor-pointer transition-all shadow-sm flex-1 min-w-[120px] ${formData[meal.field as keyof Expense]
+                    ? 'bg-yellow-600 border-yellow-600 text-white'
+                    : 'bg-white border-yellow-100 text-slate-700 hover:border-yellow-300'
+                    }`}
                 >
-                  <input 
-                    type="radio" 
+                  <input
+                    type="radio"
                     name="mealType"
                     className="hidden"
                     checked={formData[meal.field as keyof Expense] as boolean}
                     onChange={() => setFormData({
-                      ...formData, 
+                      ...formData,
                       isBreakfast: meal.field === 'isBreakfast',
                       isLunch: meal.field === 'isLunch',
                       isDinner: meal.field === 'isDinner'
@@ -232,13 +231,13 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
             <label className="block text-xs font-semibold text-orange-600 mb-1">Purpose / Details <span className="text-red-500">*</span></label>
             <div className="relative">
               <Info size={16} className="absolute left-3 top-2.5 text-orange-400" />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 required
                 className="w-full pl-10 p-2 bg-white border border-orange-100 rounded-lg text-sm"
                 placeholder="Reason for expenditure"
                 value={formData.purpose || ''}
-                onChange={e => setFormData({...formData, purpose: e.target.value})}
+                onChange={e => setFormData({ ...formData, purpose: e.target.value })}
               />
             </div>
           </div>
@@ -251,56 +250,56 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Client Name <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
                   className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
                   placeholder="Company/Individual"
                   value={formData.clientName || ''}
-                  onChange={e => setFormData({...formData, clientName: e.target.value})}
+                  onChange={e => setFormData({ ...formData, clientName: e.target.value })}
                 />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">No. of Persons <span className="text-red-500">*</span></label>
-                <input 
-                  type="number" 
+                <input
+                  type="number"
                   required
                   className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
                   value={formData.personCount || ''}
-                  onChange={e => setFormData({...formData, personCount: parseInt(e.target.value)})}
+                  onChange={e => setFormData({ ...formData, personCount: parseInt(e.target.value) })}
                 />
               </div>
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-600 mb-1">List of Persons</label>
-              <textarea 
+              <textarea
                 className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
                 placeholder="Names of attendees..."
                 value={formData.personList || ''}
-                onChange={e => setFormData({...formData, personList: e.target.value})}
+                onChange={e => setFormData({ ...formData, personList: e.target.value })}
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Hotel/Venue Name <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
                   className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
                   placeholder="Venue name"
                   value={formData.hotelName || ''}
-                  onChange={e => setFormData({...formData, hotelName: e.target.value})}
+                  onChange={e => setFormData({ ...formData, hotelName: e.target.value })}
                 />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">Location <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
                   className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
                   placeholder="Address/Area"
                   value={formData.stayLocation || ''}
-                  onChange={e => setFormData({...formData, stayLocation: e.target.value})}
+                  onChange={e => setFormData({ ...formData, stayLocation: e.target.value })}
                 />
               </div>
             </div>
@@ -314,22 +313,22 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">From Location <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
                   className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
                   value={formData.fromLocation || ''}
-                  onChange={e => setFormData({...formData, fromLocation: e.target.value})}
+                  onChange={e => setFormData({ ...formData, fromLocation: e.target.value })}
                 />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1">To Location <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
                   className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
                   value={formData.toLocation || ''}
-                  onChange={e => setFormData({...formData, toLocation: e.target.value})}
+                  onChange={e => setFormData({ ...formData, toLocation: e.target.value })}
                 />
               </div>
             </div>
@@ -339,34 +338,34 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
       case Category.AdvancePayment:
         return (
           <div className="p-4 bg-rose-50/50 rounded-xl border border-rose-100 space-y-4">
-             <h3 className="text-xs font-bold text-rose-600 uppercase tracking-wider mb-2">Advance Details</h3>
-             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">For Whom <span className="text-red-500">*</span></label>
-                  <div className="relative">
-                    <UserIcon size={14} className="absolute left-3 top-2.5 text-rose-400" />
-                    <input 
-                      type="text" 
-                      required
-                      className="w-full pl-10 p-2 bg-white border border-rose-100 rounded-lg text-sm"
-                      placeholder="Name of recipient"
-                      value={formData.advanceRecipient || ''}
-                      onChange={e => setFormData({...formData, advanceRecipient: e.target.value})}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Purpose <span className="text-red-500">*</span></label>
-                  <input 
-                    type="text" 
+            <h3 className="text-xs font-bold text-rose-600 uppercase tracking-wider mb-2">Advance Details</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">For Whom <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <UserIcon size={14} className="absolute left-3 top-2.5 text-rose-400" />
+                  <input
+                    type="text"
                     required
-                    className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
-                    placeholder="e.g. Site Expense"
-                    value={formData.purpose || ''}
-                    onChange={e => setFormData({...formData, purpose: e.target.value})}
+                    className="w-full pl-10 p-2 bg-white border border-rose-100 rounded-lg text-sm"
+                    placeholder="Name of recipient"
+                    value={formData.advanceRecipient || ''}
+                    onChange={e => setFormData({ ...formData, advanceRecipient: e.target.value })}
                   />
                 </div>
-             </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Purpose <span className="text-red-500">*</span></label>
+                <input
+                  type="text"
+                  required
+                  className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm"
+                  placeholder="e.g. Site Expense"
+                  value={formData.purpose || ''}
+                  onChange={e => setFormData({ ...formData, purpose: e.target.value })}
+                />
+              </div>
+            </div>
           </div>
         );
 
@@ -379,7 +378,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
     <div className="max-w-2xl mx-auto md:ml-64 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
       <div className="p-6 border-b border-slate-100 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="p-2 hover:bg-slate-50 rounded-full transition-colors"
           >
@@ -395,7 +394,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onAdd }) => {
           <label className="block text-sm font-semibold text-slate-700 mb-2">Amount <span className="text-red-500">*</span></label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-              <DollarSign size={18} />
+              <IndianRupee size={18} />
             </div>
             <input
               type="number"

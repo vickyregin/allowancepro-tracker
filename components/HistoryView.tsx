@@ -1,16 +1,16 @@
 
 import React, { useState, useMemo } from 'react';
-import { 
-  Search, 
-  Trash2, 
-  Calendar as CalendarIcon, 
-  MapPin, 
-  Car, 
-  Home, 
-  Utensils, 
-  Settings, 
-  Wrench, 
-  User as UserIcon, 
+import {
+  Search,
+  Trash2,
+  Calendar as CalendarIcon,
+  MapPin,
+  Car,
+  Home,
+  Utensils,
+  Settings,
+  Wrench,
+  User as UserIcon,
   Briefcase,
   Download,
   Package,
@@ -54,10 +54,10 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
 
   const filteredExpenses = useMemo(() => {
     return expenses.filter(e => {
-      const matchesSearch = e.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           e.note?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           e.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           e.project.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = e.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        e.note?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        e.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        e.project.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'All' || e.category === selectedCategory;
       const userMatch = isAdmin ? true : e.userId === currentUser.id;
       return matchesSearch && matchesCategory && userMatch;
@@ -69,12 +69,12 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
 
     // Comprehensive Headers for Admin
     const headers = [
-      "Date", "User Name", "Project", "Category", "Amount", "Description", 
-      "Travel Mode", "From", "To", "KM", "Car Type", 
-      "Stay Location", "Purpose/Detail", "Client Name", "No Persons", 
+      "Date", "User Name", "Project", "Category", "Amount", "Description",
+      "Travel Mode", "From", "To", "KM", "Car Type",
+      "Stay Location", "Purpose/Detail", "Client Name", "No Persons",
       "Person List", "Hotel Name", "Recipient", "Breakfast", "Lunch", "Dinner", "Notes"
     ];
-    
+
     const rows = filteredExpenses.map(e => [
       e.date,
       `"${e.userName.replace(/"/g, '""')}"`,
@@ -125,14 +125,14 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
     if (e.purpose) details.push(`Ref: ${e.purpose}`);
     if (e.clientName) details.push(`Client: ${e.clientName}`);
     if (e.advanceRecipient) details.push(`To: ${e.advanceRecipient}`);
-    
+
     // Food details
     const meals = [];
     if (e.isBreakfast) meals.push('Breakfast');
     if (e.isLunch) meals.push('Lunch');
     if (e.isDinner) meals.push('Dinner');
     if (meals.length > 0) details.push(`Meals: ${meals.join(', ')}`);
-    
+
     return details.length > 0 ? details.join(' | ') : null;
   };
 
@@ -140,10 +140,10 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
     <div className="space-y-6 md:ml-64">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-            <h2 className="text-2xl font-bold text-slate-800">Transaction History</h2>
-            <p className="text-sm text-slate-500">{isAdmin ? 'Viewing all registered users' : 'Your personal records'}</p>
+          <h2 className="text-2xl font-bold text-slate-800">Transaction History</h2>
+          <p className="text-sm text-slate-500">{isAdmin ? 'Viewing all registered users' : 'Your personal records'}</p>
         </div>
-        
+
         <div className="flex flex-wrap items-center gap-2">
           {isAdmin && (
             <button
@@ -168,7 +168,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
               className="block w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
             />
           </div>
-          
+
           <select
             value={selectedCategory}
             onChange={e => setSelectedCategory(e.target.value as any)}
@@ -218,14 +218,14 @@ const HistoryView: React.FC<HistoryViewProps> = ({ expenses, onDelete, currentUs
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-sm font-bold text-slate-900">${expense.amount.toFixed(2)}</p>
+                    <p className="text-sm font-bold text-slate-900">₹{expense.amount.toFixed(2)}</p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => {
-                      if(window.confirm('Delete this entry?')) onDelete(expense.id);
+                      if (window.confirm('Delete this entry?')) onDelete(expense.id);
                     }}
                     className="p-2 text-slate-300 hover:text-red-500 transition-colors rounded-lg"
                   >
